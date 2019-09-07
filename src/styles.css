@@ -1,7 +1,169 @@
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar:hover {
+    height: 8px;
+}
+
+::-webkit-scrollbar-button:start:decrement,
+::-webkit-scrollbar-button:end:increment {
+    display: none;
+}
+::-webkit-scrollbar-button:horizontal:decrement {
+    display: none;
+}
+::-webkit-scrollbar-button:horizontal:increment {
+    display: none;
+}
+::-webkit-scrollbar-button:vertical:decrement {
+    display: none;
+}
+::-webkit-scrollbar-button:vertical:increment {
+    display: none;
+}
+::-webkit-scrollbar-button:horizontal:decrement:active {
+    background-image: none;
+}
+::-webkit-scrollbar-button:horizontal:increment:active {
+    background-image: none;
+}
+::-webkit-scrollbar-button:vertical:decrement:active {
+    background-image: none;
+}
+::-webkit-scrollbar-button:vertical:increment:active {
+    background-image: none;
+}
+::-webkit-scrollbar-track-piece {
+    background-color: transparent;
+}
+::-webkit-scrollbar-corner {
+    background: #09121c;
+}
+
+::-webkit-scrollbar-thumb:vertical {
+    height: 50px;
+    background: -webkit-gradient(
+        linear,
+        left top,
+        right top,
+        color-stop(0%, #3a3a3a),
+        color-stop(100%, #3a3a3a)
+    );
+    border: 1px solid #000;
+    border-top: 1px solid #000;
+    border-left: 1px solid #000;
+}
+
+::-webkit-scrollbar-thumb:horizontal {
+    width: 50px;
+    background: -webkit-gradient(
+        linear,
+        left top,
+        left bottom,
+        color-stop(0%, #3a3a3a),
+        color-stop(100%, #3a3a3a)
+    );
+    border: 1px solid #000;
+    border-top: 1px solid #000;
+    border-left: 1px solid #000;
+}
+
 .App {
-  font-family: sans-serif;
+    font-family: sans-serif;
 }
 
 * {
-  box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+#root {
+    padding: 50px;
+    background-color: #282a2f;
+    width: 100%;
+    height: 100%;
+}
+
+.xtable {
+    width: 100%;
+    display: block;
+    color: #fff;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+}
+
+.xtable-body {
+    overflow: auto;
+    height: 300px;
+}
+
+.xtable-header-row {
+    position: relative;
+    display: flex;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    overflow: hidden;
+}
+
+.xtable-header {
+    position: relative;
+    padding: 5px 8px;
+    font-size: 18px;
+    font-weight: 500;
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+}
+
+.xtable-header:last-child {
+    border-right: 0px;
+}
+
+.xtable-row {
+    position: relative;
+    display: flex;
+    overflow: hidden;
+}
+
+.xtable-row:hover {
+    background-color: rgba(118, 216, 118, 0.24) !important;
+}
+
+.xtable-row:nth-child(even) {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.xtable-cell {
+    position: relative;
+    overflow: hidden;
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.6rem;
+}
+
+.xtable-cell:last-child {
+    border-right: 0px;
+}
+
+.xtable-cell span {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.xtable-resizer {
+    width: 15px;
+    height: 100%;
+    display: block;
+    position: absolute;
+    top: 0px;
+    right: -5px;
+}
+
+.xtable-ceilbar {
+    margin-bottom: 10px;
+}
+
+.xtable-floorbar {
+    margin-top: 10px;
 }

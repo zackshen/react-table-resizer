@@ -1,372 +1,271 @@
 import React, {
-  useRef,
-  useState,
-  useEffect,
-  useLayoutEffect,
-  useMemo
-} from "react";
-import JsonTree from "react-json-tree";
-import { FixedSizeList as List } from "react-window";
+    forwardRef,
+    useRef,
+    useState,
+    useEffect,
+    useLayoutEffect,
+} from 'react'
+import { FixedSizeList as List } from 'react-window'
 import {
-  useTable,
-  useColumns,
-  useRows,
-  useGroupBy,
-  useFilters,
-  useSortBy,
-  useExpanded,
-  usePagination,
-  useFlexLayout,
-  useResizer
-} from "../react-table";
-
-import {
-  Table,
-  Row,
-  HeaderRow,
-  Header,
-  Cell,
-  Button,
-  Select,
-  Input,
-  Emoji,
-  Resizer,
-  Pagination
-} from "./Styles";
-
-const useInfiniteScroll = ({
-  enabled,
-  sortBy,
-  groupBy,
-  filters,
-  pageIndex,
-  pageSize
-}) => {
-  const listRef = useRef();
-  const [scrollToIndex, setScrollToIndex] = useState(0);
-  const [rowHeight, setRowHeight] = useState(40);
-  const [height, setHeight] = useState(500);
-  const [overscan, setOverscan] = useState(5);
-
-  useEffect(() => {
-    if (!enabled) {
-      return;
-    }
-    if (listRef.current) {
-      listRef.current.scrollToItem(scrollToIndex, "start");
-    }
-  }, [scrollToIndex]);
-
-  useEffect(() => {}, []);
-
-  useLayoutEffect(() => {
-    if (!enabled) {
-      return;
-    }
-    if (listRef.current) {
-      listRef.current.scrollToItem(0, "start");
-    }
-  }, [sortBy, groupBy, filters]);
-
-  return {
-    listRef,
-    scrollToIndex,
-    setScrollToIndex,
-    rowHeight,
-    setRowHeight,
-    height,
-    setHeight,
-    overscan,
-    setOverscan
-  };
-};
-
-export default function MyTable({ loading, infinite, ...props }) {
-  const instance = useTable(
-    {
-      ...props
-    },
-
+    useTable,
     useColumns,
     useRows,
-    useResizer,
-    useGroupBy,
     useFilters,
     useSortBy,
     useExpanded,
     usePagination,
-    useFlexLayout
-  );
+    useFlexLayout,
+    useResizer,
+} from '../react-table'
 
-  const {
-    getTableProps,
-    headerGroups,
-    rows,
-    columns,
-    getRowProps,
-    pageOptions,
-    page,
-    state: [
-      {
-        pageIndex,
-        pageSize,
+import Pagination from 'antd/lib/pagination'
+import 'antd/lib/pagination/style/css' /* eslint-disable-line */
+
+const Table = forwardRef(({ children, ...restProps }, ref) => (
+    <div {...restProps} ref={ref} className="xtable">
+        {children}
+    </div>
+))
+const HeaderRow = forwardRef(({ children, scrollX, ...restProps }, ref) => {
+    const props = { ...restProps }
+    props.style.left = 0 - scrollX
+    return (
+        <div {...props} ref={ref} className="xtable-header-row">
+            {children}
+        </div>
+    )
+})
+const Header = forwardRef(
+    ({ children, sorted, sortedIndex, sortedDesc, ...restProps }, ref) => (
+        <div {...restProps} ref={ref} className="xtable-header">
+            {children}
+        </div>
+    )
+)
+const Body = forwardRef(({ children, ...restProps }, ref) => (
+    <div {...restProps} ref={ref} className="xtable-body">
+        {children}
+    </div>
+))
+const Row = forwardRef(({ children, ...restProps }, ref) => (
+    <div {...restProps} ref={ref} className="xtable-row">
+        {children}
+    </div>
+))
+const Cell = forwardRef(({ children, ...restProps }, ref) => (
+    <div {...restProps} ref={ref} className="xtable-cell">
+        {children}
+    </div>
+))
+const Resizer = forwardRef(({ children, ...restProps }, ref) => (
+    <div {...restProps} ref={ref} className="xtable-resizer">
+        {children}
+    </div>
+))
+
+const Ceilbar = forwardRef(({ children, ...restProps }, ref) => (
+    <div {...restProps} ref={ref} className="xtable-ceilbar">
+        {children}
+    </div>
+))
+const Floorbar = forwardRef(({ children, ...restProps }, ref) => (
+    <div {...restProps} ref={ref} className="xtable-floorbar">
+        {children}
+    </div>
+))
+
+const useScroll = tableRef => {
+    const [pos, setPos] = useState({ x: 0, y: 0 })
+    useEffect(() => {
+        let handleScroll = e => {
+            const { scrollLeft, scrollTop } = e.target
+            if (pos.x !== scrollLeft || pos.y !== scrollTop) {
+                setPos({
+                    x: scrollLeft,
+                    y: scrollTop,
+                })
+            }
+        }
+        if (tableRef) {
+            tableRef.addEventListener('scroll', handleScroll, true)
+        }
+        return () => {
+            if (tableRef) {
+                tableRef.removeEventListener('scroll', handleScroll)
+            }
+        }
+    }, [tableRef])
+    return pos
+}
+
+const useInfiniteScroll = ({ enabled, sortBy, groupBy, filters }) => {
+    const listRef = useRef()
+    const [scrollToIndex, setScrollToIndex] = useState(0)
+    const [rowHeight, setRowHeight] = useState(40)
+    const [height, setHeight] = useState(500)
+    const [overscan, setOverscan] = useState(5)
+
+    useEffect(() => {
+        if (!enabled) {
+            return
+        }
+        if (listRef.current) {
+            listRef.current.scrollToItem(scrollToIndex, 'start')
+        }
+    }, [scrollToIndex])
+
+    useEffect(() => {}, [])
+
+    useLayoutEffect(() => {
+        if (!enabled) {
+            return
+        }
+        if (listRef.current) {
+            listRef.current.scrollToItem(0, 'start')
+        }
+    }, [sortBy, groupBy, filters])
+
+    return {
+        listRef,
+        scrollToIndex,
+        setScrollToIndex,
+        rowHeight,
+        setRowHeight,
+        height,
+        setHeight,
+        overscan,
+        setOverscan,
+    }
+}
+
+export default function MyTable({ loading, infinite, ...props }) {
+    const instance = useTable(
+        {
+            ...props,
+        },
+
+        useColumns,
+        useRows,
+        useResizer,
+        useFilters,
+        useSortBy,
+        useExpanded,
+        usePagination,
+        useFlexLayout
+    )
+
+    const {
+        getTableProps,
+        headerGroups,
+        rows,
+        getRowProps,
+        page,
+        state: [{ pageIndex, pageSize, sortBy, groupBy, filters }],
+        prepareRow,
+        setPageSize,
+        gotoPage,
+    } = instance
+    const tableProps = getTableProps()
+
+    const { listRef, rowHeight, height, overscan } = useInfiniteScroll({
+        enabled: infinite,
         sortBy,
         groupBy,
         filters,
-        resizedColumns,
-        resizing
-      }
-    ],
+        pageIndex,
+        pageSize,
+    })
 
-    gotoPage,
-    prepareRow,
-    previousPage,
-    nextPage,
-    setPageSize,
-    canPreviousPage,
-    canNextPage
-  } = instance;
+    const scroll = useScroll(tableProps.ref.current)
 
-  const {
-    listRef,
-    scrollToIndex,
-    setScrollToIndex,
-    rowHeight,
-    setRowHeight,
-    height,
-    setHeight,
-    overscan,
-    setOverscan
-  } = useInfiniteScroll({
-    enabled: infinite,
-    sortBy,
-    groupBy,
-    filters,
-    pageIndex,
-    pageSize
-  });
+    let tableBody
 
-  let tableBody;
-
-  const renderRow = (row, index, style = {}) => {
-    if (!row) {
-      return (
-        <Row {...{ style, even: index % 2 }}>
-          <Cell>Loading more...</Cell>
-        </Row>
-      );
+    const renderRow = (row, index, style = {}) => {
+        if (!row) {
+            return (
+                <Row {...{ style }}>
+                    <Cell>Loading more...</Cell>
+                </Row>
+            )
+        }
+        prepareRow(row)
+        return (
+            <Row {...row.getRowProps({ style, even: index % 2 })}>
+                {row.cells.map(cell => {
+                    return (
+                        <Cell {...cell.getCellProps()}>
+                            <span>{cell.render('Cell')}</span>
+                        </Cell>
+                    )
+                })}
+            </Row>
+        )
     }
-    prepareRow(row);
+
+    if (infinite) {
+        tableBody = (
+            <List
+                ref={listRef}
+                height={height}
+                itemCount={rows.length + 1}
+                itemSize={rowHeight}
+                overscanCount={overscan}
+                scrollToAlignment="start"
+                {...getRowProps()}
+            >
+                {({ index, style }) => {
+                    const row = rows[index]
+                    return renderRow(row, index, style)
+                }}
+            </List>
+        )
+    } else {
+        tableBody =
+            page && page.length ? page.map((row, i) => renderRow(row, i)) : null
+    }
+
+    let pagination = (
+        <Pagination
+            showSizeChanger
+            onChange={page => {
+                gotoPage(page)
+            }}
+            onShowSizeChange={(_, pageSize) => {
+                setPageSize(pageSize)
+            }}
+            defaultCurrent={1}
+            current={pageIndex}
+            total={rows.length}
+        />
+    )
+
     return (
-      <Row {...row.getRowProps({ style, even: index % 2 })}>
-        {row.cells.map(cell => {
-          const isPivot = row.groupByID === cell.column.id;
-          const showAggregate = row.subRows && !isPivot;
-          return (
-            <Cell {...cell.getCellProps()}>
-              {showAggregate ? (
-                cell.column.aggregate ? (
-                  cell.render("Aggregated")
-                ) : null
-              ) : (
-                <span>
-                  {isPivot ? (
-                    <span
-                      style={{
-                        cursor: "pointer",
-                        paddingLeft: `${row.depth * 2}rem`,
-                        paddingRight: "1rem",
-                        whiteSpace: "nowrap"
-                      }}
-                      onClick={() => row.toggleExpanded()}
+        <div>
+            <Ceilbar></Ceilbar>
+            <Table {...tableProps} className="xtable">
+                {headerGroups.map(headerGroup => (
+                    <HeaderRow
+                        {...headerGroup.getRowProps()}
+                        scrollX={scroll.x}
                     >
-                      <Emoji style={{}}>{row.isExpanded ? "👇" : "👉"}</Emoji>
-                    </span>
-                  ) : null}
-                  {cell.render("Cell")}
-                  {isPivot ? <span> ({row.subRows.length})</span> : null}
-                </span>
-              )}
-            </Cell>
-          );
-        })}
-      </Row>
-    );
-  };
-
-  const getFinalWidth = col => {
-    let width = col.width || 0;
-
-    if (col.minWidth && width < col.minWidth) width = col.minWidth;
-
-    if (col.maxWidth && width > col.maxWidth) width = col.maxWidth;
-
-    return width;
-  };
-
-  if (infinite) {
-    tableBody = (
-      <List
-        ref={listRef}
-        height={height}
-        itemCount={rows.length + 1}
-        itemSize={rowHeight}
-        overscanCount={overscan}
-        scrollToAlignment="start"
-        {...getRowProps()}
-      >
-        {({ index, style }) => {
-          const row = rows[index];
-          return renderRow(row, index, style);
-        }}
-      </List>
-    );
-  } else {
-    tableBody =
-      page && page.length ? page.map((row, i) => renderRow(row, i)) : null;
-  }
-
-  let pagination;
-
-  if (infinite) {
-    pagination = (
-      <Pagination {...getRowProps()}>
-        <Cell>
-          <span>
-            Go to result:{" "}
-            <Input
-              type="number"
-              defaultValue={scrollToIndex + 1}
-              onChange={e => {
-                const start = e.target.value ? Number(e.target.value) - 1 : 0;
-                setScrollToIndex(start);
-              }}
-              style={{ width: "100px" }}
-            />
-          </span>{" "}
-          Table Height:{" "}
-          <Select
-            value={height}
-            onChange={e => {
-              setHeight(Number(e.target.value));
-            }}
-          >
-            {[100, 500, 1000].map(height => (
-              <option key={height} value={height}>
-                {height}px
-              </option>
-            ))}
-          </Select>{" "}
-          Overscan:{" "}
-          <Input
-            type="number"
-            value={overscan}
-            onChange={e => {
-              setOverscan(Number(e.target.value));
-            }}
-            style={{ width: "100px" }}
-          />{" "}
-          Row Height:{" "}
-          <Input
-            type="number"
-            value={rowHeight}
-            onChange={e => {
-              setRowHeight(Number(e.target.value));
-            }}
-            style={{ width: "100px" }}
-          />
-        </Cell>
-      </Pagination>
-    );
-  } else {
-    pagination = pageOptions.length ? (
-      <Pagination {...getRowProps()}>
-        <Cell>
-          <Button onClick={() => previousPage()} disabled={!canPreviousPage}>
-            Previous
-          </Button>{" "}
-          <Button onClick={() => nextPage()} disabled={!canNextPage}>
-            Next
-          </Button>{" "}
-          <span>
-            Page{" "}
-            <strong>
-              {pageIndex + 1} of {pageOptions.length}
-            </strong>{" "}
-          </span>
-          <span>
-            | Go to page:{" "}
-            <Input
-              type="number"
-              defaultValue={pageIndex + 1}
-              onChange={e => {
-                const page = e.target.value ? Number(e.target.value) - 1 : 0;
-                gotoPage(page);
-              }}
-              style={{ width: "100px" }}
-            />
-          </span>{" "}
-          <Select
-            value={pageSize}
-            onChange={e => {
-              setPageSize(Number(e.target.value));
-            }}
-          >
-            {[10, 20, 30, 40, 50, 100, 200, 300, 500, 1000].map(pageSize => (
-              <option key={pageSize} value={pageSize}>
-                Show {pageSize}
-              </option>
-            ))}
-          </Select>
-        </Cell>
-      </Pagination>
-    ) : null;
-  }
-
-  return (
-    <div>
-      <Table {...getTableProps()}>
-        {headerGroups.map(headerGroup => (
-          <HeaderRow {...headerGroup.getRowProps()}>
-            {headerGroup.headers.map(column => (
-              <Header
-                {...column.getHeaderProps()}
-                sorted={column.sorted}
-                sortedDesc={column.sortedDesc}
-                sortedIndex={column.sortedIndex}
-              >
-                <div>
-                  <span {...column.getSortByToggleProps()}>
-                    {column.render("Header")}
-                  </span>{" "}
-                  {column.canGroupBy ? (
-                    <Emoji {...column.getGroupByToggleProps()}>
-                      {column.grouped ? "🛑" : "👊"}
-                    </Emoji>
-                  ) : null}
-                </div>
-                {column.canFilter ? <div>{column.render("Filter")}</div> : null}
-
-                <Resizer {...column.getResizerProps()} />
-              </Header>
-            ))}
-          </HeaderRow>
-        ))}
-        {tableBody}
-        <Row {...getRowProps()}>
-          {loading ? (
-            <Cell>
-              <strong>Loading...</strong>
-            </Cell>
-          ) : (
-            <Cell>{rows.length} Total Records</Cell>
-          )}
-        </Row>
-        {pagination}
-      </Table>
-      <br />
-      <br />
-      <JsonTree data={instance} />
-    </div>
-  );
+                        {headerGroup.headers.map(column => (
+                            <Header
+                                {...column.getHeaderProps()}
+                                sorted={column.sorted}
+                                sortedDesc={column.sortedDesc}
+                                sortedIndex={column.sortedIndex}
+                            >
+                                <span {...column.getSortByToggleProps()}>
+                                    {column.render('Header')}
+                                </span>{' '}
+                                <Resizer {...column.getResizerProps()} />
+                            </Header>
+                        ))}
+                    </HeaderRow>
+                ))}
+                <Body>{tableBody}</Body>
+            </Table>
+            <Floorbar>{pagination}</Floorbar>
+        </div>
+    )
 }
