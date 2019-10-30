@@ -7,7 +7,7 @@
   "dependencies": {
     "axios": "0.18.0",
     "emotion": "9.2.6",
-    "lodash": "4.17.11",
+    "lodash": "4.17.15",
     "memoize-one": "4.0.0",
     "namor": "1.0.1",
     "raf": "3.4.0",
